@@ -10,7 +10,7 @@ Lx = Ly = Lz = 2*np.pi
 Nx = Ny = Nz = 64
 N0 = 4
 w = 0.5
-Rm = 5
+Rm = 3
 update_u = True
 dealias = 3/2
 timestepper = d3.RK222
@@ -109,7 +109,7 @@ try:
         if update_u:
             solve_u()
         if (B_solver.iteration-1) % 10 == 0:
-            logger.info('Iteration=%i, Time=%e, dt=%e, u_norm=%.2e, M=%.2e' %(B_solver.iteration, B_solver.sim_time, timestep, flow.max('u_norm'), flow.max('M')))
+            logger.info('Iteration=%i, Time=%e, dt=%e, u_norm=%.2e, energy=%.2e, enstrophy=%.2e, M=%.2e' %(B_solver.iteration, B_solver.sim_time, timestep, flow.max('u_norm'), flow.max('energy'), flow.max('enstrophy'), flow.max('M')))
 except:
     logger.error('Exception raised, triggering end of main loop.')
     raise
