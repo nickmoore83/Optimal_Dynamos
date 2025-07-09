@@ -6,4 +6,13 @@
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
 \f0\fs28 \cf0 \
-Need to put notes here on how to run dedalus codes.}
+Need to put notes here on how to run dedalus codes.\
+\
+\
+\
+\
+Ideas to try.\
+July 9, 2025: When Keaton and I run simulations, we see instantaneous growth of M and then eventual decay. In these simulations, the velocity field is being updated at each time-step. I believe the problem is the growth of the bandwidth. The optimal velocity field has double the band-width of the B field, and the induction equation steadily increases the band-width of the B field. My hypothesis is that we need to suppress higher wave numbers. I have a few ideas:\
+1. Insert hyper-diffusion into the induction equation to suppress high wavenumber growth.\
+2. Modify the code to monitor  the kinetic energy and enstrophy of the flow separately. Perhaps the enstrophy to energy ratio is so high that normalizing the total norm scales the flow down to small magnitude. Then magnetic diffusion just takes over.\
+3. Try to run the code with w=1, i.e. no enstrophy constraint, just to see what happens.}
