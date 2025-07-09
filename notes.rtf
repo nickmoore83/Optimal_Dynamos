@@ -6,11 +6,13 @@
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
 \f0\fs28 \cf0 \
-Need to put notes here on how to run dedalus codes.\
-\
-\
-\
-\
+Commands to run the dedalus simulations:\
+mpiexec -n 4 python3 simulation.py      \
+python3 plot_scalars.py scalars/*.h5\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\cf0 python3 plot_snapshots.py snapshots/*.h5\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
 Ideas to try.\
 July 9, 2025: When Keaton and I run simulations, we see instantaneous growth of M and then eventual decay. In these simulations, the velocity field is being updated at each time-step. I believe the problem is the growth of the bandwidth. The optimal velocity field has double the band-width of the B field, and the induction equation steadily increases the band-width of the B field. My hypothesis is that we need to suppress higher wave numbers. I have a few ideas:\
 1. Insert hyper-diffusion into the induction equation to suppress high wavenumber growth.\

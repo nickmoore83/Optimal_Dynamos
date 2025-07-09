@@ -9,15 +9,15 @@ logger = logging.getLogger(__name__)
 Lx = Ly = Lz = 2*np.pi
 Nx = Ny = Nz = 64
 N0 = 4
-w = 0.01
-Rm = 15
+w = 0.5
+Rm = 5
 update_u = True
 dealias = 3/2
 timestepper = d3.RK222
 timestep = 5e-3
-stop_sim_time = 2
+stop_sim_time = 5
 dtype = np.float64
-seed = 21
+seed = 4
 
 # Bases
 coords = d3.CartesianCoordinates('x', 'y', 'z')
@@ -40,7 +40,10 @@ c3 = dist.Field(name='c3')
 # Substitutions
 ω = d3.curl(u)
 j = d3.curl(B)
-E = (w/2)*d3.ave(u@u) + ((1-w)/2)*d3.ave(ω@ω)
+#E = (w/2)*d3.ave(u@u) + ((1-w)/2)*d3.ave(ω@ω)
+energy = 0.5*d3.ave(u@u)
+enstrophy = 0.5*d3.ave(ω@ω)
+u_norm = w*energy + (1-w)*enstrophy
 M = d3.ave(B@B)
 
 # Velocity LBVP
@@ -52,9 +55,9 @@ u_lbvp = u_lbvp.build_solver()
 
 def solve_u():
     u_lbvp.solve()
-    E0 = E.evaluate().allgather_data()[0,0,0]
-    u['c'] /= E0**0.5
-    E.evaluate()
+    u_norm0 = u_norm.evaluate().allgather_data()[0,0,0]
+    u['c'] /= u_norm0**0.5
+    u_norm.evaluate()
     return u
 
 # Divergence cleaning
@@ -78,12 +81,16 @@ snapshots.add_task(B, name='B')
 snapshots.add_task(u, name='u')
 snapshots.add_task(ω, name='ω')
 scalars = B_solver.evaluator.add_file_handler('scalars', iter=1)
-scalars.add_task(E, name='E')
+scalars.add_task(energy, name='energy')
+scalars.add_task(enstrophy, name='enstrophy')
+scalars.add_task(u_norm, name='u_norm')
 scalars.add_task(M, name='M')
 
 # Flow properties
 flow = d3.GlobalFlowProperty(B_solver, cadence=10)
-flow.add_property(E, name='E')
+flow.add_property(energy, name='energy')
+flow.add_property(enstrophy, name='enstrophy')
+flow.add_property(u_norm, name='u_norm')
 flow.add_property(M, name='M')
 
 # Initial conditions
@@ -102,7 +109,7 @@ try:
         if update_u:
             solve_u()
         if (B_solver.iteration-1) % 10 == 0:
-            logger.info('Iteration=%i, Time=%e, dt=%e, E=%.2e, M=%.2e' %(B_solver.iteration, B_solver.sim_time, timestep, flow.max('E'), flow.max('M')))
+            logger.info('Iteration=%i, Time=%e, dt=%e, u_norm=%.2e, M=%.2e' %(B_solver.iteration, B_solver.sim_time, timestep, flow.max('u_norm'), flow.max('M')))
 except:
     logger.error('Exception raised, triggering end of main loop.')
     raise
