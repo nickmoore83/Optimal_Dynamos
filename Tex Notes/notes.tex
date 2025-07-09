@@ -271,13 +271,16 @@ The opposite extreme of $\weight = 0$ corresponds to a unit constraint on enstro
 
 \vsp{5}
 
+\nick{Comment to make:}
 A huge benefit is that our results can narrow the search for optimal kinematic dynamos considerably. The kinematic dynamo problem consists of finding a velocity/magnetic field {\em pair} that leads to dynamo action. Thus, finding optimal dynamos requires searching a direct product of two function spaces (that for the velocity field and that for the magnetic field). Consider this problem approached numerically, where $O(N)$ grid points (or coefficients) are used to specify the velocity field and the magnetic field each. Then the optimization requires searching an $O(N^2)$ space. But the explicit formula () linking the velocity and magnetic field allows one to search only over the space of permissible magnetic fields (or maybe velocity fields) thus reducing the search to $O(N)$. In typically examples, $N$ might be on the order of 100, giving an increased efficiency of order 100.
 
-\vsp{5}
 
+
+\newpage
 %---------------------------------------------------------------------------%
-
 \section{Numerical examples}
+
+Note: These are the old numerical examples implemented by Nick in Julia before we got the sniper (Keaton) on the team.
 
 We now introduce some numerical examples to demonstrate that the solution of \cref{PDE2} gives the optimal growth of the the magnetic energy $M$ by comparing against randomly selected velocity fields.
 
@@ -329,25 +332,23 @@ To this end, we work in the periodic cube $(x,y,z) \in [0, 2\pi)^3$ and assume t
 where $\nproj$ represents the divergence-free projection operator normalized to give unit energy.
 The above represents a Fourier series truncated at wavenumber $K$.
 
-\nick{Note: Above is how I want to define the magnetic field so that (a) there is z-dependence and thus no Cowling gotchas, (b) the index range of $k_1$ and $k_2$ (along with the c.c.) takes care of the symmetries due to the field being real (and also so that the formula is consistent with my code)}.
+%\nick{Note: Above is how I want to define the magnetic field so that (a) there is z-dependence and thus no Cowling gotchas, (b) the index range of $k_1$ and $k_2$ (along with the c.c.) takes care of the symmetries due to the field being real (and also so that the formula is consistent with my code)}.
 
-To gain an understanding of the complexity of the magnetic fields generated for a particular $K$, it is beneficial to count the degrees of freedom. Given that the constant mode $\hat{\Bvec}_{0,0}$ has been removed, there are ostensibly $4K(K+1)$ non-zero, complex Fourier coefficients in \cref{B_Fourier}, where each coefficient $ \hat{\Bvec}_{k_1, k_2}$ is vector valued with three components. Because the field $\Bvec$ is real, the coefficients satisfy the conjugate relation $\hat{\Bvec}_{-k_1, -k_2} = \hat{\Bvec}_{k_1, k_2}^*$ and so there are $2K(K+1)$ independent, complex-vector coefficients. Since each coefficient is a vector of length three, there are $6K(K+1)$ complex-scalar degrees of freedom or $12K(K+1)$ real-scalar degrees of freedom.
-The divergence-free constraint and the normalization each remove a degree of freedom. \nick{(I think the div-free here is a mistake; Div-free constraint removes more than a single constraint)}
-Additionally, translations over the $xy$-plane removes two degrees of freedom, resulting in a total of $12K(K+1) - 4$ degrees of freedom. 
-Thus, even a $K=1$ truncation corresponds to 20 real degrees of freedom in the magnetic field.
+To gain an understanding of the complexity of the magnetic fields generated for a particular $K$, it is beneficial to count the degrees of freedom. First, supposing the range of each summation was $k=-K,\cdots,K$ and the $(k_1,k_2)=(0,0)$ mode can be removed, there are $(2K+1)^2-1 = 4K(K+1)$ complex coefficients for a scalar field or $12K(K+1)$ coefficients for a vector field with three components. The condition that $\Bvec$ is real implies $\hat{\Bvec}_{-k_1,-k_2} = \hat{\Bvec}_{k_1,k_2}^*$. The mapping $(k_1,k_2) \to (-k_1,-k_2)$ is a bijection on the ordered pairs and, since $(0,0)$ has been removed, no elements map to themselves. Thus, this symmetry reduces the number of coefficients needing to be specified by a half, giving $6K(K+1)$ independent complex coefficients for $\Bvec$. Next, the divergence-free constraint imposes a condition for each ordered pair $(k_1,k_2)$, of which there are $2K(K+1)$ under consideration. Exploiting the div-free condition thus gives $4K(K+1)$ independent complex coefficients in $\Bvec$. So far we have accounted for the fact that the vector field is real and divergence free.
 
-\nick{Calculation with Stefan on July 7, 2025. We calculated the degrees of freedom for the case $K=1$, for which $k=-1,0,1$. There is thus a $3\times3$ grid of ordered pairs, remove the $(0,0)$ mode gives 8 ordered pairs. There are three component of the B-field which gives 24 dof. The div-free constraint is a constraint for each ordered pair $(k_1,k_2)$ removing 8 dof. We now have a total of 16 dof. Normalization brings it to 15. Translations brings it to 13. So there are 13 real degrees of freedom. Note that the conjugate relation and the fact that a complex number is two real numbers balance each other out.}
+Next, we could begin to exploit coordinate symmetries; that is, the ultimate operation performed on these fields to compute the magnetic growth rate is a physical one and thus it does not care what coordinate system we choose to use. The most profitable symmetry is translations. Accounting for translation in each direction removes a full (real) degree of freedom. Rotations can be exploited too, but only rotations by multiples of $90^\circ$ preserve the periodic box structure. Thus this is a discrete symmetry and does not reduce the search space nearly as much as translations do. Lastly, we have the normalization condition on $\Bvec$ which technically reduces the dimension of the search space, but to enforce this condition, I would probably first sample the bigger space and then normalize the vector, which would not exploit this constraint in sampling. One could potentially sample the unit hypersphere another way, but I honestly don't think there is a simple, direct way to do it that makes the reduction of the sample space worthwhile.
 
-\nick{For 3D, }
+To give a concrete example, for the 2.5 dimensional example $\Bvec(x,y)$ with $K=1$, there are $4K(K+1) = 8$ complex degrees of freedom or 16 real degrees of freedom. Accounting for translations reduces the number to 14 real degrees of freedom. For $K=2$, there would be $4K(K+1)=24$ complex degrees of freedom or 48 real ones and removing translations reduces it to 46.
  
 The optimal velocity field given by the solution to \cref{PDE2} is quadratic in $\Bvec$ (since $\jvec = \grad \times \Bvec$) and therefore will possess non-trivial Fourier components up to wavenumber $2K$. For a faithful comparison, we therefore consider randomly selected velocity fields with the same number of components
 \begin{align}
 \label{vrand}
 \vrand &= \nproj \left[ 
-\sum_{k_1=0}^{K} \sum_{k_2=-K}^{K}
+\sum_{k_1=0}^{2K} \sum_{k_2=-2K}^{2K}
 \hat{\vv}_{k_1, k_2} \, \eikx + c.c. \right]
 \end{align}
-Similar to the magnetic field, we remove the constant mode $\hat{\vv}_{0,0} = 0$ \nick{(Can I justify this? See note in Codes Folder.)}, and since the velocity field is real, the conjugate relation is satisfied $\hat{\vv}_{-k_1, -k_2} = \hat{\vv}_{k_1, k_2}^*$. The number of degrees of freedom in $\vrand$ is $24K(2K+1) - 4$ (i.e.~the same as in $\Bvec$, just with $K$ replaced by $2K$).
+Similar to the magnetic field, we remove the constant mode $\hat{\vv}_{0,0} = 0$; 
+\nick{(Can I justify this? See note in Codes Folder.)}.
 
 \vsp{5}
 TO DO
