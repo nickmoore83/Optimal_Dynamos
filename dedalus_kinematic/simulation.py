@@ -15,7 +15,7 @@ update_u = True
 dealias = 3/2
 timestepper = d3.RK222
 timestep = 5e-3
-stop_sim_time = 5
+stop_sim_time = 2
 dtype = np.float64
 seed = 4
 

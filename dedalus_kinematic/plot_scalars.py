@@ -14,7 +14,7 @@ import pathlib
 from docopt import docopt
 
 # Parameters
-tasks = ['M', 'E']
+tasks = ['energy', 'enstrophy', 'u_norm', 'M']
 figsize = (6, 4)
 
 # Plot
