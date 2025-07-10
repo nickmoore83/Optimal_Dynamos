@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 Lx = Ly = Lz = 2*np.pi
 Nx = Ny = Nz = 64
 N0 = 4
-w = 0.5
+w = 0.99
 Rm = 3
-update_u = True
+update_u = False
 dealias = 2     # cubic nonlinearity 
 timestepper = d3.RK222
 timestep = 5e-3
@@ -40,7 +40,6 @@ c3 = dist.Field(name='c3')
 # Substitutions
 ω = d3.curl(u)
 j = d3.curl(B)
-#E = (w/2)*d3.ave(u@u) + ((1-w)/2)*d3.ave(ω@ω)
 energy = 0.5*d3.ave(u@u)
 enstrophy = 0.5*d3.ave(ω@ω)
 u_norm = w*energy + (1-w)*enstrophy
