@@ -7,17 +7,18 @@ logger = logging.getLogger(__name__)
 
 # Parameters
 Lx = Ly = Lz = 2*np.pi
-Nx = Ny = Nz = 64
+Nx = Ny = Nz = 32
 N0 = 4
-w = 0.99
-Rm = 3
-update_u = False
+w = 0.5
+Rm = 5
+hyperdiff = 2e-3
+update_u = True
 dealias = 2     # cubic nonlinearity 
 timestepper = d3.RK222
-timestep = 5e-3
+timestep = 1e-2
 stop_sim_time = 2
 dtype = np.float64
-seed = 4
+seed = 5
 
 # Bases
 coords = d3.CartesianCoordinates('x', 'y', 'z')
@@ -69,6 +70,7 @@ B_div = B_div.build_solver()
 # Magnetic IVP
 B_ivp = d3.IVP(variables=[B, p3, c3], namespace=locals())
 B_ivp.add_equation("dt(B) - (1/Rm)*lap(B) + grad(p3) = curl(cross(u, B))")
+# Hyperdiffusion term: - hyperdiff*lap(lap(lap(B)))
 B_ivp.add_equation("div(B) + c3 = 0")
 B_ivp.add_equation("integ(p3) = 0")
 B_solver = B_ivp.build_solver(timestepper)
